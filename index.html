@@ -325,6 +325,9 @@ body.oncontact .pill,body.oncontact .srch{background:rgba(200,205,255,.14);borde
       <b id="seqLbl">Próximo: espectador 1</b>
       <div class="stp"><button id="sMinus">−</button><button id="sPlus">+</button></div>
     </div>
+    <div id="linkbox" style="display:none;margin:6px 0 0;padding:10px 12px;border-radius:12px;background:#0c0c10;border:1px solid #33333f;color:#9ca3af;font-size:12px;word-break:break-all;-webkit-user-select:text;user-select:text"></div>
+    <button class="btn sec" id="copylink">Copiar link com estes números</button>
+    <button class="btn sec" id="restore">Restaurar números padrão</button>
     <button class="btn sec" id="zero">Zerar (voltar ao espectador 1)</button>
     <button class="btn pri" id="done">Concluir</button>
   </div>
@@ -376,9 +379,25 @@ const CONTACTS=(function(){
 
 /* ===== estado salvo (force) ===== */
 const KEY='contatos_force_v1';
-let S={forces:['','','','',''],idx:0,ts:Date.now()};
-try{ const j=JSON.parse(localStorage.getItem(KEY)||'null'); if(j&&Array.isArray(j.forces)){S=Object.assign(S,j); while(S.forces.length<5)S.forces.push('');}
-     if(Date.now()-(S.ts||0)>4*3600*1000) S.idx=0; }catch(e){}
+/* ===== NÚMEROS PADRÃO (espectadores 1 a 5; '' = sem force) — edite aqui para trocar o padrão ===== */
+const DEFAULT_FORCES=['97','13','00','38',''];
+/* Ordem de prioridade: 1) link com #f=97,13,00,38  2) o que foi alterado na tela de configuração  3) DEFAULT_FORCES */
+let S={forces:DEFAULT_FORCES.slice(),idx:0,ts:Date.now(),custom:false};
+try{
+  const j=JSON.parse(localStorage.getItem(KEY)||'null');
+  if(j){ if(typeof j.idx==='number') S.idx=j.idx; S.ts=j.ts||0;
+         if(j.custom&&Array.isArray(j.forces)){ S.forces=j.forces.slice(0,5); while(S.forces.length<5)S.forces.push(''); S.custom=true; } }
+  if(Date.now()-(S.ts||0)>4*3600*1000) S.idx=0;
+}catch(e){}
+(function(){ // link com os números no endereço
+  const m=(location.hash||'').match(/[#&]f=([^&]*)/);
+  if(!m) return;
+  const parts=decodeURIComponent(m[1]).split(',').map(x=>x.replace(/\D/g,'').slice(0,4));
+  while(parts.length<5)parts.push('');
+  S.forces=parts.slice(0,5); S.custom=true; S.idx=0; S.ts=Date.now();
+  try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+  try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}
+})();
 function save(){ S.ts=Date.now(); try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){} }
 
 function numberFor(c){
@@ -582,7 +601,7 @@ const frows=$('frows');
 frows.innerHTML=[0,1,2,3,4].map(i=>`<div class="frow"><label>Espectador ${i+1}</label><input data-k="${i}" type="tel" inputmode="numeric" maxlength="4" placeholder="—" autocomplete="off"></div>`).join('');
 frows.addEventListener('input',e=>{
   const k=e.target.dataset.k; if(k===undefined)return;
-  e.target.value=e.target.value.replace(/\D/g,'').slice(0,4); S.forces[k]=e.target.value; save();
+  e.target.value=e.target.value.replace(/\D/g,'').slice(0,4); S.forces[k]=e.target.value; S.custom=true; save();
 });
 function seqLbl(){ $('seqLbl').textContent=S.idx>=5?'Sequência encerrada (números reais)':`Próximo: espectador ${S.idx+1}`; }
 function openCfg(){
@@ -594,6 +613,14 @@ $('sMinus').onclick=()=>{S.idx=Math.max(0,S.idx-1);save();seqLbl();};
 $('sPlus').onclick=()=>{S.idx=Math.min(5,S.idx+1);save();seqLbl();};
 $('zero').onclick=()=>{S.idx=0;save();seqLbl();};
 $('done').onclick=closeCfg;
+$('copylink').onclick=()=>{
+  const url=location.origin+location.pathname+'#f='+S.forces.map(x=>x||'').join(',');
+  const box=$('linkbox'); box.style.display='block'; box.textContent=url;
+  const ok=()=>{$('copylink').textContent='Link copiado ✓'; setTimeout(()=>$('copylink').textContent='Copiar link com estes números',1800);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(url).then(ok,()=>{}); }
+  else{ const t=document.createElement('textarea'); t.value=url; document.body.appendChild(t); t.select(); try{document.execCommand('copy');ok();}catch(e){} t.remove(); }
+};
+$('restore').onclick=()=>{ S.forces=DEFAULT_FORCES.slice(); S.custom=false; S.idx=0; save(); frows.querySelectorAll('input').forEach(i=>i.value=S.forces[i.dataset.k]||''); seqLbl(); };
 </script>
 </body>
 </html>
