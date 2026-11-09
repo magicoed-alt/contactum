@@ -13,10 +13,16 @@
 <title>Contatos</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
-html,body{margin:0;width:100%;height:100%;min-height:100vh;min-height:-webkit-fill-available;overflow:hidden;background:#fff;overscroll-behavior:none;
+html,body{margin:0;width:100%;overflow:hidden;background:#fff;overscroll-behavior:none;
   font-family:-apple-system,"SF Pro Text","SF Pro Display",system-ui,"Helvetica Neue",Arial,sans-serif;color:#000}
 :root{--top:max(env(safe-area-inset-top,0px),24px);--bot:max(env(safe-area-inset-bottom,0px),20px)}
-#app{position:fixed;top:0;left:0;width:100%;height:100%;height:100vh;height:100lvh;overflow:hidden;background:#fff}
+html{min-height:100%}
+/* Correção do bug do iOS 26 (barra branca embaixo no app da Tela de Início com status bar translúcida):
+   o documento precisa ser mais alto que a viewport "encurtada" pelo iOS */
+@media (display-mode: standalone){ html{min-height:min(100lvh,calc(100% + env(safe-area-inset-top)))} }
+html.sa{min-height:min(100lvh,calc(100% + env(safe-area-inset-top)))}
+body{min-height:100%}
+#app{position:fixed;top:0;left:0;right:0;bottom:0;overflow:hidden;background:#fff}
 .view{position:absolute;top:0;left:0;right:0;bottom:0;transition:transform .38s cubic-bezier(.32,.72,0,1)}
 
 /* ---------- LISTA ---------- */
@@ -275,19 +281,8 @@ body.oncontact .pill,body.oncontact .srch{background:rgba(200,205,255,.14);borde
 </div>
 
 <script>
-/* ===== tela cheia (iOS às vezes reporta altura menor) ===== */
-(function(){
-  const app=document.getElementById('app');
-  function fit(){
-    const portrait=innerHeight>=innerWidth;
-    const h=portrait?Math.max(innerHeight,screen.height||0,document.documentElement.clientHeight):innerHeight;
-    app.style.height=h+'px';
-    document.documentElement.style.setProperty('--vh',h+'px');
-  }
-  fit(); addEventListener('resize',fit); addEventListener('orientationchange',()=>setTimeout(fit,200));
-  addEventListener('pageshow',fit); document.addEventListener('visibilitychange',fit);
-  [100,400,1000,2500].forEach(t=>setTimeout(fit,t));
-})();
+/* ===== tela cheia (iOS 26): marca modo standalone ===== */
+if(window.navigator.standalone) document.documentElement.classList.add('sa');
 
 /* ===== utilidades ===== */
 function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -385,7 +380,7 @@ function paintContact(){
 function openContact(i){
   if(view!=='list')return;
   current=i; paintContact(); $('cscroll').scrollTop=0;
-  baseEl=PANES[pane]; cv.classList.add('on'); baseEl.classList.add('shift'); document.body.classList.add('oncontact');
+  document.documentElement.style.background='#403a85'; baseEl=PANES[pane]; cv.classList.add('on'); baseEl.classList.add('shift'); document.body.classList.add('oncontact');
   view='contact'; openedAt=Date.now();
 }
 function closeContact(commit,instant){
@@ -393,6 +388,7 @@ function closeContact(commit,instant){
   if(instant){cv.style.transition=baseEl.style.transition='none';}
   cv.classList.remove('on'); baseEl.classList.remove('shift'); document.body.classList.remove('oncontact');
   if(instant){void cv.offsetWidth; cv.style.transition=baseEl.style.transition='';}
+  document.documentElement.style.background='#fff';
   view='list';
   if(commit){ lastCommit={t:Date.now(),prev:S.idx}; S.idx=Math.min(S.idx+1,5); save(); }
 }
