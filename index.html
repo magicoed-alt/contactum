@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Contatos">
+<meta name="theme-color" content="#ffffff">
+<link rel="apple-touch-icon" href="icon.png">
+<title>Contatos</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#fff;overscroll-behavior:none;
+  font-family:-apple-system,"SF Pro Text","SF Pro Display",system-ui,"Helvetica Neue",Arial,sans-serif;color:#000}
+:root{--top:max(env(safe-area-inset-top,0px),24px);--bot:max(env(safe-area-inset-bottom,0px),20px)}
+#app{position:fixed;top:0;left:0;right:0;bottom:0;overflow:hidden;background:#fff}
+.view{position:absolute;top:0;left:0;right:0;bottom:0;transition:transform .38s cubic-bezier(.32,.72,0,1)}
+
+/* ---------- LISTA ---------- */
+#listView{background:#fff}
+#listView.shift{transform:translateX(-28%)}
+#scroll{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding-top:calc(var(--top) + 58px);padding-bottom:calc(var(--bot) + 90px);touch-action:pan-y}
+.sh{position:sticky;top:0;z-index:2;height:28px;line-height:28px;padding-left:20px;font-size:15px;font-weight:700;color:#8e8e93;background:rgba(255,255,255,.96)}
+.row{display:flex;align-items:center;padding-left:20px;min-height:60px;content-visibility:auto;contain-intrinsic-size:60px}
+.av{flex:none;width:41px;height:41px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:600;font-size:19px;letter-spacing:-.3px;
+  background:linear-gradient(180deg,#a4aedb 0%,#7a85bd 55%,#6a73ae 100%)}
+.rt{flex:1;margin-left:10px;padding:9px 20px 9px 0;min-height:60px;display:flex;flex-direction:column;justify-content:center;border-bottom:.6px solid rgba(60,60,67,.22);margin-right:18px}
+.row .nm{font-size:17px;font-weight:600;line-height:22px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .sb{font-size:17px;line-height:21px;color:#8e8e93;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row:active{background:rgba(0,0,0,.05)}
+
+.topbar{position:absolute;top:0;left:0;right:0;height:calc(var(--top) + 72px);pointer-events:none;z-index:5;
+  background:linear-gradient(to bottom,rgba(255,255,255,.94) 0%,rgba(255,255,255,.86) 58%,rgba(255,255,255,0) 100%);
+  -webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);
+  -webkit-mask-image:linear-gradient(to bottom,#000 58%,transparent 100%);mask-image:linear-gradient(to bottom,#000 58%,transparent 100%)}
+.nav{position:absolute;left:0;right:0;top:calc(var(--top) - 5px);height:41px;z-index:6;pointer-events:none}
+.nav .ttl{position:absolute;left:0;right:0;top:0;line-height:41px;text-align:center;font-size:17px;font-weight:600}
+.glass{position:absolute;pointer-events:auto;display:flex;align-items:center;justify-content:center;
+  background:rgba(250,250,253,.78);border:1px solid rgba(255,255,255,.85);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+  box-shadow:0 2px 12px rgba(0,0,0,.10),0 0 0 .6px rgba(0,0,0,.08),inset 0 1px 1px rgba(255,255,255,.95);color:#000}
+.cbtn{width:41px;height:41px;border-radius:50%}
+.nav .l{left:18px}.nav .r{right:18px}
+.cbtn svg{width:22px;height:22px;stroke:#000;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+#index{position:absolute;right:3px;top:50%;transform:translateY(-52%);z-index:4;display:flex;flex-direction:column;align-items:center;touch-action:none;padding:6px 6px}
+#index span{font-size:11.5px;line-height:12.55px;font-weight:700;color:#1b7cf5;width:16px;text-align:center}
+
+/* ---------- CONTATO ---------- */
+#contactView{background:linear-gradient(180deg,#90a1bd 0%,#8190b3 22%,#6f78ae 48%,#5a5aad 72%,#403a85 100%);
+  transform:translateX(100%);box-shadow:-6px 0 24px rgba(0,0,0,.18);z-index:3}
+#contactView.on{transform:translateX(0)}
+#cscroll{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:calc(var(--top) + 74px) 16px calc(var(--bot) + 100px);color:#fff;touch-action:pan-y}
+.bigav{width:239px;height:239px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;
+  font-size:110px;font-weight:600;color:#f2f2f7;letter-spacing:-2px;
+  background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.10),rgba(255,255,255,.03) 70%);
+  border:1.5px solid rgba(255,255,255,.28);
+  box-shadow:inset 0 3px 4px rgba(255,255,255,.55),inset 0 -3px 5px rgba(255,255,255,.35),0 0 0 1px rgba(70,80,130,.25),0 8px 30px rgba(30,30,80,.15)}
+.cname{text-align:center;font-size:25px;font-weight:700;margin:26px 0 17px;letter-spacing:-.2px;text-shadow:0 1px 6px rgba(0,0,0,.12)}
+.actions{display:flex;justify-content:center;gap:7px;margin-bottom:23px}
+.ab{position:relative;width:57px;height:57px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:rgba(120,130,215,.38);border:1.2px solid rgba(165,190,255,.65);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  box-shadow:inset 0 1px 2px rgba(255,255,255,.45),0 2px 8px rgba(30,30,90,.15)}
+.ab svg{width:28px;height:28px;fill:#fff}
+.ab.dis svg{opacity:.4}
+.card{background:rgba(112,118,214,.55);border-radius:22px;margin-bottom:6px;padding:12px 18px;position:relative;
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.card .lbl{font-size:15px;line-height:20px;white-space:nowrap}
+.card .val{font-size:19px;line-height:26px;letter-spacing:-.1px}
+.card.flex{display:flex;align-items:center;justify-content:space-between}
+.card.notes{height:98px;margin-top:0}
+.card .ic{width:20px;height:20px;fill:#fff;flex:none}
+.card .chev{width:18px;height:18px;stroke:#fff;stroke-width:2.6;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.card.lst{padding:0}
+.card.lst div{padding:13px 18px;font-size:17px;line-height:24px;border-bottom:.6px solid rgba(255,255,255,.18)}
+.card.lst div:last-child{border-bottom:none}
+.card.lst div.red{color:#ffd1d1}
+#contactView .nav{z-index:6}
+#contactView .glass{background:rgba(125,135,215,.32);border:1.2px solid rgba(170,195,255,.7);color:#fff;
+  box-shadow:inset 0 1px 2px rgba(255,255,255,.5),0 2px 10px rgba(30,30,90,.15)}
+#contactView .cbtn svg{stroke:#fff}
+.edit{right:18px;height:41px;padding:0 24px;border-radius:21px;font-size:19px;font-weight:500;color:#fff}
+
+/* ---------- TAB BAR ---------- */
+#tabbar{position:absolute;left:19px;right:19px;bottom:calc(var(--bot) - 15px);height:57px;display:flex;gap:6px;z-index:10}
+.pill{flex:1;position:relative;display:flex;justify-content:center;align-items:center;border-radius:29px;
+  background:rgba(250,250,253,.62);border:1px solid rgba(255,255,255,.75);
+  -webkit-backdrop-filter:blur(22px) saturate(190%);backdrop-filter:blur(22px) saturate(190%);
+  box-shadow:0 6px 20px rgba(0,0,0,.12),0 0 0 .6px rgba(0,0,0,.08),inset 0 1px 1px rgba(255,255,255,.9);transition:background .3s}
+.srch{flex:none;width:57px;height:57px;border-radius:50%;position:relative;transition:background .3s}
+.srch.glass{position:relative}
+.tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;height:49px;border-radius:25px;color:#000;font-size:11.5px;font-weight:500;letter-spacing:-.1px;white-space:nowrap}
+.tab svg{width:26px;height:26px;margin-bottom:1px}
+.t1{width:52px}.t2{width:92px;color:#1b6ee6}.t2.sel{background:rgba(118,118,128,.16)}.t3{width:100px}
+.badge{position:absolute;top:-1px;left:50%;margin-left:5px;min-width:21px;height:21px;border-radius:11px;background:#ef4444;color:#fff;font-size:12.5px;font-weight:600;line-height:21px;text-align:center;padding:0 5px;box-shadow:0 0 0 1.5px rgba(255,255,255,.6)}
+body.oncontact .pill,body.oncontact .srch{background:rgba(185,185,250,.45);border-color:rgba(215,215,255,.7)}
+
+/* ---------- CONFIG ---------- */
+#cfg{position:absolute;top:0;left:0;right:0;bottom:0;z-index:50;display:none;background:#08080c;color:#e8e8ee;
+  padding:calc(var(--top) + 16px) 22px calc(var(--bot) + 20px);overflow-y:auto;touch-action:pan-y}
+#cfg.open{display:block}
+#cfg h1{font-size:22px;margin:4px 0 4px;font-weight:700}
+#cfg p{margin:0 0 18px;color:#8e8e98;font-size:14px;line-height:19px}
+.frow{display:flex;align-items:center;justify-content:space-between;background:#1a1a22;border-radius:14px;padding:10px 16px;margin-bottom:8px}
+.frow label{font-size:17px}
+.frow input{width:96px;background:#0c0c10;border:1px solid #33333f;border-radius:10px;color:#fff;font-size:22px;letter-spacing:3px;text-align:center;padding:8px;-webkit-user-select:text;user-select:text}
+.frow input:focus{outline:none;border-color:#22d3ee}
+.seq{display:flex;align-items:center;justify-content:space-between;background:#102a30;border:1px solid #155e6b;border-radius:14px;padding:10px 16px;margin:18px 0 12px}
+.seq b{font-size:17px;font-weight:600;color:#67e8f9}
+.stp{display:flex;align-items:center;gap:14px;font-size:20px;font-weight:700;color:#fff}
+.stp button{width:40px;height:40px;border-radius:50%;border:none;background:#164e5a;color:#fff;font-size:22px}
+.btn{display:block;width:100%;border:none;border-radius:14px;padding:15px;font-size:17px;font-weight:600;margin-top:10px}
+.btn.pri{background:#06b6d4;color:#00262c}
+.btn.sec{background:#26262f;color:#e8e8ee}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- LISTA -->
+  <div id="listView" class="view">
+    <div id="scroll"></div>
+    <div class="topbar"></div>
+    <div class="nav">
+      <div class="ttl">Contatos</div>
+      <div class="glass cbtn l"><svg viewBox="0 0 24 24"><path d="M15 4 L7 12 L15 20"/></svg></div>
+      <div class="glass cbtn r"><svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg></div>
+    </div>
+    <div id="index"></div>
+  </div>
+
+  <!-- CONTATO -->
+  <div id="contactView" class="view">
+    <div id="cscroll">
+      <div class="bigav" id="cInit">BV</div>
+      <div class="cname" id="cName"></div>
+      <div class="actions">
+        <div class="ab"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div>
+        <div class="ab"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>
+        <div class="ab"><svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg></div>
+        <div class="ab dis"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
+      </div>
+      <div class="card flex"><div><div class="lbl">celular</div><div class="val" id="cNum"></div></div>
+        <svg class="ic" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>
+      <div class="card flex"><div><div class="lbl">WhatsApp (a Siri encontrou em WhatsApp)</div><div class="val" id="cWa"></div></div>
+        <svg class="chev" viewBox="0 0 24 24"><path d="M9 4l8 8-8 8"/></svg></div>
+      <div class="card notes"><div class="lbl">Notas</div></div>
+      <div class="card lst" style="margin-top:12px">
+        <div>Enviar Mensagem</div><div>Compartilhar Contato</div><div>Adicionar aos Favoritos</div>
+        <div>Adicionar aos Contatos de Emergência</div><div>Compartilhar Minha Localização</div>
+      </div>
+      <div class="card lst" style="margin-top:12px"><div class="red">Bloquear Contato</div></div>
+    </div>
+    <div class="topbar" style="background:none;-webkit-backdrop-filter:none;backdrop-filter:none"></div>
+    <div class="nav">
+      <div class="glass cbtn l" id="backBtn"><svg viewBox="0 0 24 24"><path d="M15 4 L7 12 L15 20"/></svg></div>
+      <div class="glass edit">Editar</div>
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div id="tabbar">
+    <div class="pill">
+      <div class="tab t1">
+        <svg viewBox="0 0 26 26"><circle cx="13" cy="13" r="12" fill="#111"/><path d="M13 6.5v7h5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" transform="scale(.8) translate(3.3 3.3)"/></svg>
+        Chamadas<span class="badge">12</span>
+      </div>
+      <div class="tab t2 sel">
+        <svg viewBox="0 0 26 26"><circle cx="13" cy="13" r="12" fill="#2f74e6"/><circle cx="13" cy="10" r="4.2" fill="#b9d0fa"/><path d="M5.2 20.3c1.4-3.6 4.2-5 7.8-5s6.4 1.4 7.8 5A11.9 11.9 0 0 1 13 25 11.9 11.9 0 0 1 5.2 20.3z" fill="#b9d0fa"/></svg>
+        Contatos
+      </div>
+      <div class="tab t3">
+        <svg viewBox="0 0 26 26" fill="#111"><circle cx="5" cy="4" r="2.6"/><circle cx="13" cy="4" r="2.6"/><circle cx="21" cy="4" r="2.6"/><circle cx="5" cy="10.7" r="2.6"/><circle cx="13" cy="10.7" r="2.6"/><circle cx="21" cy="10.7" r="2.6"/><circle cx="5" cy="17.4" r="2.6"/><circle cx="13" cy="17.4" r="2.6"/><circle cx="21" cy="17.4" r="2.6"/><circle cx="13" cy="24" r="2.2"/></svg>
+        Teclado numérico
+      </div>
+    </div>
+    <div class="glass srch"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.8"/><path d="M15.6 15.6 21 21"/></svg></div>
+  </div>
+
+  <!-- CONFIG (toque triplo) -->
+  <div id="cfg">
+    <h1>Force dos números</h1>
+    <p>Digite os últimos dígitos (1 a 4) que cada espectador vai ver. Deixe vazio para não forçar. Fica salvo no aparelho.</p>
+    <div id="frows"></div>
+    <div class="seq">
+      <b id="seqLbl">Próximo: espectador 1</b>
+      <div class="stp"><button id="sMinus">−</button><button id="sPlus">+</button></div>
+    </div>
+    <button class="btn sec" id="zero">Zerar (voltar ao espectador 1)</button>
+    <button class="btn pri" id="done">Concluir</button>
+  </div>
+</div>
+
+<script>
+/* ===== utilidades ===== */
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const strip=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'');
+
+/* ===== gerador dos 1000 contatos (sempre os mesmos) ===== */
+const FIRST=`Ana,Adriana,Alan,Alexandre,Alice,Aline,Amanda,André,Antônio,Arthur,Augusto,Beatriz,Bárbara,Bernardo,Bianca,Breno,Bruno,Caio,Camila,Carlos,Carolina,Cesar,Cláudia,Cristina,Daniel,Davi,Débora,Denise,Diego,Douglas,Edson,Eduardo,Eliane,Elisa,Emanuel,Érica,Evandro,Fábio,Felipe,Fernanda,Flávia,Francisco,Gabriel,Gabriela,Gisele,Guilherme,Gustavo,Heitor,Helena,Henrique,Hugo,Igor,Ingrid,Irene,Isabela,Isadora,Ivan,Jéssica,João,Joana,Jorge,José,Juliana,Júlio,Kaique,Karina,Kátia,Kelly,Kleber,Larissa,Laura,Leandro,Leonardo,Letícia,Lívia,Luana,Lucas,Luciana,Luiz,Manuela,Marcelo,Márcia,Marcos,Mariana,Maurício,Michele,Miguel,Mônica,Natália,Nathalia,Nelson,Nicolas,Olívia,Orlando,Oscar,Osvaldo,Otávio,Patrícia,Paulo,Pedro,Priscila,Quésia,Quitéria,Rafael,Renata,Ricardo,Roberto,Rodrigo,Rosana,Samuel,Sandra,Sérgio,Simone,Sofia,Talita,Tatiana,Thiago,Ubiratã,Ulisses,Úrsula,Valéria,Vanessa,Vinícius,Vitor,Viviane,Wagner,Walter,Wanessa,Wesley,William,Wilson,Xande,Xavier,Xênia,Ximena,Yago,Yara,Yasmin,Yuri,Zeca,Zélia,Zilda,Zoe,Zuleica,Beto,Dani,Fabi,Gui,Léo,Lu,Mari,Rafa,Tita,Vivi`.split(',');
+const LAST=`Silva,Santos,Oliveira,Souza,Lima,Pereira,Costa,Ferreira,Rodrigues,Almeida,Nascimento,Carvalho,Gomes,Martins,Araújo,Ribeiro,Barbosa,Rocha,Dias,Moreira,Mendes,Cardoso,Teixeira,Vaz,Ferraz,Sierota,Magalhães,Barbieri,Campos,Freitas,Nunes,Moura,Lopes,Pinto,Correia,Cunha,Monteiro,Castro,Azevedo,Machado,Andrade,Fernandes,Duarte,Batista,Siqueira,Tavares,Borges,Miranda,Xavier,Zanetti,Yamamoto,Kobayashi,Wagner,Quintela,Ueda,Ortiz,Ibrahim,Jardim,Lacerda,Nogueira,Paiva,Ramos,Soares,Vieira,Brandão,Medeiros,Peixoto,Rezende,Toledo,Franco,Guimarães,Pacheco,Salgado,Veiga,Bueno,Cavalcanti,Domingues,Esteves,Garcia,Henriques,Macedo,Prado,Queiroz,Zago`.split(',');
+const ROLES=`Dj,Foto,Buffet,Decor,Doces,Bolos,Som,Cerimonial,Segurança,Salão,Ag Eventos,Cm Car,Ag Boris,Personal,Dentista,Médico,Advogado,Contador,Pintor,Pedreiro,Eletricista,Encanador,Motoboy,Vizinho,Síndico,Barbeiro,Costureira,Fisio,Pet`.split(',');
+const ORGS=`Durr,Acessoria,Eventos,Buffet Alegria,IHG - Hotéis,Serasa Experian,Banco Itaú,Casa de Festas,Hotéis Transamérica,Cerimonial Real,Escola Objetivo,Clínica Saúde,Agência Boris,Decorações,Som e Luz,Fotografia,Contabilidade,Advocacia,Imobiliária,Seguros`.split(',');
+const BPRE=`Buffet,Espaço,Casa de Festas,Studio,Bolos da,Doces da,Salão,Clube,Hotel,Pousada,Restaurante,Pizzaria,Padaria,Farmácia,Auto Center,Pet Shop,Estúdio,Decor,Mundo,Reino,Beach,Super,Mega,Casa`.split(',');
+const BNAME=`Alegria,Fantasia,Encanto,Mágico,Pula Pula,Brasil,Paulista,Jardins,Moema,Tatuapé,Pinheiros,Vila Madalena,Ipiranga,Santana,Mooca,Lapa,Perdizes,Pet,Sol,Estrela,Aurora,Diamante,Imperial,Central,Premium,Kids,Folia`.split(',');
+const SPECIAL=[['0800 Atendimento'],['24h Farmácia'],['3M Brasil'],['7 Mares Buffet'],['99 Táxi'],['4 Estações Eventos'],['11 Cartório']];
+
+const collator=new Intl.Collator('pt-BR',{sensitivity:'base',ignorePunctuation:true});
+const CONTACTS=(function(){
+  const R=mulberry(20261109), pick=a=>a[Math.floor(R()*a.length)];
+  const seen=new Set(), out=[];
+  const add=(d,ini,sub)=>{ if(seen.has(d))return; seen.add(d); out.push({d,ini:strip(ini).toUpperCase(),sub:sub||''}); };
+  SPECIAL.forEach(s=>add(s[0],s[0][0]));
+  while(out.length<1000){
+    const r=R(), g=pick(FIRST), f=pick(LAST);
+    if(r<.58) add(g+' '+f, g[0]+f[0]);
+    else if(r<.66) add(g, g[0]);
+    else if(r<.70) add(f, f[0]);
+    else if(r<.79) add(g+' '+f+' - '+pick(ORGS), g[0]);
+    else if(r<.85) add(g+' '+f, g[0]+f[0], pick(ORGS));
+    else if(r<.91) add(g+' '+pick(ROLES), g[0]);
+    else { const a=pick(BPRE), b=pick(BNAME), d=a+' '+b; const w=d.split(' '); add(d, w.length==2?w[0][0]+w[1][0]:w[0][0]); }
+  }
+  out.sort((a,b)=>collator.compare(a.d,b.d));
+  const DDD=[11,11,11,11,11,11,11,11,21,19,12,13,41,31,47,15];
+  out.forEach((c,i)=>{
+    c.i=i; c.ddd=pick(DDD);
+    let n='9'; for(let k=0;k<8;k++) n+=Math.floor(R()*10);
+    c.num=n; // 9 dígitos
+    const L=strip(c.d[0]).toUpperCase(); c.sec=/[A-Z]/.test(L)?L:'#';
+  });
+  return out;
+})();
+
+/* ===== estado salvo (force) ===== */
+const KEY='contatos_force_v1';
+let S={forces:['','','','',''],idx:0,ts:Date.now()};
+try{ const j=JSON.parse(localStorage.getItem(KEY)||'null'); if(j&&Array.isArray(j.forces)){S=Object.assign(S,j); while(S.forces.length<5)S.forces.push('');}
+     if(Date.now()-(S.ts||0)>4*3600*1000) S.idx=0; }catch(e){}
+function save(){ S.ts=Date.now(); try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){} }
+
+function numberFor(c){
+  let last4=c.num.slice(5);                // últimos 4 dígitos reais
+  const f=S.idx<5 ? (S.forces[S.idx]||'') : '';
+  if(f) last4=last4.slice(0,4-f.length)+f;
+  return `+55 (${c.ddd}) ${c.num.slice(0,5)}-${last4}`;
+}
+
+/* ===== render da lista ===== */
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+(function(){
+  let h='',cur='';
+  for(const c of CONTACTS){
+    if(c.sec!==cur){ cur=c.sec; h+=`<div class="sec" id="sec-${cur==='#'?'H':cur}"><div class="sh">${cur}</div>`; }
+    h+=`<div class="row" data-i="${c.i}"><div class="av">${esc(c.ini)}</div><div class="rt"><div class="nm">${esc(c.d)}</div>${c.sub?`<div class="sb">${esc(c.sub)}</div>`:''}</div></div>`;
+    const nx=CONTACTS[c.i+1]; if(!nx||nx.sec!==cur) h+='</div>';
+  }
+  $('scroll').innerHTML=h;
+  const L='ABCDEFGHIJKLMNOPQRSTUVWXYZ#'.split('');
+  $('index').innerHTML=L.map(x=>`<span data-l="${x}">${x}</span>`).join('');
+})();
+
+/* índice A-Z */
+const idxEl=$('index'), scrollEl=$('scroll');
+function jump(y){
+  const r=idxEl.getBoundingClientRect(); const spans=idxEl.children;
+  let k=Math.round(((y-r.top-6)/(r.height-12))*(spans.length-1)); k=Math.max(0,Math.min(spans.length-1,k));
+  const l=spans[k].dataset.l; let sec=document.getElementById('sec-'+(l==='#'?'H':l));
+  if(!sec){ // letra sem contatos: próxima existente
+    for(let j=k+1;j<spans.length;j++){const s2=document.getElementById('sec-'+(spans[j].dataset.l==='#'?'H':spans[j].dataset.l)); if(s2){sec=s2;break;}}
+  }
+  const pad=parseFloat(getComputedStyle(scrollEl).paddingTop);
+  scrollEl.scrollTop=sec?sec.offsetTop-pad:scrollEl.scrollHeight;
+}
+idxEl.addEventListener('touchstart',e=>{e.preventDefault();jump(e.touches[0].clientY)},{passive:false});
+idxEl.addEventListener('touchmove',e=>{e.preventDefault();jump(e.touches[0].clientY)},{passive:false});
+
+/* ===== navegação ===== */
+let view='list', current=null, openedAt=0, lastCommit=null;
+const cv=$('contactView'), lv=$('listView');
+function paintContact(){
+  const c=CONTACTS[current]; if(!c)return;
+  $('cInit').textContent=c.ini; $('cName').textContent=c.d; $('cNum').textContent=numberFor(c); $('cWa').textContent=c.d;
+}
+function openContact(i){
+  if(view!=='list')return;
+  current=i; paintContact(); $('cscroll').scrollTop=0;
+  cv.classList.add('on'); lv.classList.add('shift'); document.body.classList.add('oncontact');
+  view='contact'; openedAt=Date.now();
+}
+function closeContact(commit,instant){
+  if(view!=='contact')return;
+  if(instant){cv.style.transition=lv.style.transition='none';}
+  cv.classList.remove('on'); lv.classList.remove('shift'); document.body.classList.remove('oncontact');
+  if(instant){void cv.offsetWidth; cv.style.transition=lv.style.transition='';}
+  view='list';
+  if(commit){ lastCommit={t:Date.now(),prev:S.idx}; S.idx=Math.min(S.idx+1,5); save(); }
+}
+scrollEl.addEventListener('click',e=>{const r=e.target.closest('.row'); if(r)openContact(+r.dataset.i);});
+$('backBtn').addEventListener('click',()=>closeContact(true));
+/* arrastar da borda esquerda = voltar */
+let ex=null;
+document.addEventListener('touchstart',e=>{ex=(view==='contact'&&e.touches[0].clientX<26)?{x:e.touches[0].clientX,y:e.touches[0].clientY}:null},{passive:true});
+document.addEventListener('touchend',e=>{ if(ex){const t=e.changedTouches[0]; if(t.clientX-ex.x>70&&Math.abs(t.clientY-ex.y)<80)closeContact(true); ex=null;}},{passive:true});
+document.addEventListener('gesturestart',e=>e.preventDefault());
+
+/* ===== toque triplo em qualquer lugar ===== */
+let taps=[], dn=null, swallow=false;
+document.addEventListener('pointerdown',e=>{dn={t:Date.now(),x:e.clientX,y:e.clientY}},true);
+document.addEventListener('pointerup',e=>{
+  if(!dn||cfgOpen)return;
+  const now=Date.now();
+  if(now-dn.t>350||Math.hypot(e.clientX-dn.x,e.clientY-dn.y)>14)return;
+  taps=taps.filter(t=>now-t<900); taps.push(now);
+  if(taps.length>=3){
+    const t1=taps[0]; taps=[];
+    // desfaz o que os próprios toques possam ter feito
+    if(view==='contact'&&openedAt>=t1-100) closeContact(false,true);
+    if(lastCommit&&lastCommit.t>=t1-100){S.idx=lastCommit.prev; lastCommit=null; save();}
+    swallow=true; setTimeout(()=>{swallow=false},500);
+    setTimeout(openCfg,0);
+  }
+},true);
+document.addEventListener('click',e=>{ if(swallow){e.stopPropagation();e.preventDefault();} },true);
+
+/* ===== tela de configuração ===== */
+let cfgOpen=false;
+const frows=$('frows');
+frows.innerHTML=[0,1,2,3,4].map(i=>`<div class="frow"><label>Espectador ${i+1}</label><input data-k="${i}" type="tel" inputmode="numeric" maxlength="4" placeholder="—" autocomplete="off"></div>`).join('');
+frows.addEventListener('input',e=>{
+  const k=e.target.dataset.k; if(k===undefined)return;
+  e.target.value=e.target.value.replace(/\D/g,'').slice(0,4); S.forces[k]=e.target.value; save();
+});
+function seqLbl(){ $('seqLbl').textContent=S.idx>=5?'Sequência encerrada (números reais)':`Próximo: espectador ${S.idx+1}`; }
+function openCfg(){
+  cfgOpen=true; frows.querySelectorAll('input').forEach(inp=>inp.value=S.forces[inp.dataset.k]||'');
+  seqLbl(); $('cfg').classList.add('open');
+}
+function closeCfg(){ cfgOpen=false; $('cfg').classList.remove('open'); document.activeElement&&document.activeElement.blur(); if(view==='contact')paintContact(); taps=[]; }
+$('sMinus').onclick=()=>{S.idx=Math.max(0,S.idx-1);save();seqLbl();};
+$('sPlus').onclick=()=>{S.idx=Math.min(5,S.idx+1);save();seqLbl();};
+$('zero').onclick=()=>{S.idx=0;save();seqLbl();};
+$('done').onclick=closeCfg;
+</script>
+</body>
+</html>
