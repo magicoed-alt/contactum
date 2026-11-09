@@ -7,7 +7,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Telefone">
-<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <title>Telefone</title>
@@ -17,6 +19,7 @@ html,body{margin:0;width:100%;overflow:hidden;background:#fff;overscroll-behavio
   font-family:-apple-system,"SF Pro Text","SF Pro Display",system-ui,"Helvetica Neue",Arial,sans-serif;color:#000}
 :root{--top:max(env(safe-area-inset-top,0px),24px);--bot:max(env(safe-area-inset-bottom,0px),20px)}
 html{min-height:100%}
+html.cvopen{background:#403a85}
 /* Correção do bug do iOS 26 (barra branca embaixo no app da Tela de Início com status bar translúcida):
    o documento precisa ser mais alto que a viewport "encurtada" pelo iOS */
 @media (display-mode: standalone){ html{min-height:min(100lvh,calc(100% + env(safe-area-inset-top)))} }
@@ -154,6 +157,53 @@ body.oncontact .pill,body.oncontact .srch{background:rgba(200,205,255,.14);borde
 #sclr{display:none;width:18px;height:18px;border-radius:50%;background:#aeaeb2;color:#fff;font-size:14px;line-height:18px;text-align:center;flex:none}
 #sres{padding-top:calc(var(--top) + 56px);padding-bottom:calc(var(--kb,0px) + 40px)}
 .nores{text-align:center;margin-top:90px;font-size:22px;font-weight:700;color:#000}.nores span{display:block;font-size:16px;font-weight:400;color:#8e8e93;margin-top:6px}
+
+
+/* ================= MODO ESCURO (segue o sistema) ================= */
+@media (prefers-color-scheme: dark){
+  html,body,#app,#listView,#recentsView,#keysView,#searchView{background:#000}
+  html.cvopen{background:#1a1230}
+  body{color:#fff}
+  .sh{background:rgba(0,0,0,.92);color:#8e8e93;font-weight:500}
+  .rt,.rbody{border-bottom-color:rgba(255,255,255,.2)}
+  .row:active{background:rgba(255,255,255,.08)}
+  .av,.avg{background:linear-gradient(180deg,#5b5992 0%,#3e3b74 55%,#2b2756 100%)}
+  .topbar{background:linear-gradient(to bottom,rgba(0,0,0,.94) 0%,rgba(0,0,0,.86) 58%,rgba(0,0,0,0) 100%)}
+  .glass{background:rgba(42,42,48,.74);border-color:rgba(255,255,255,.14);color:#fff;
+    box-shadow:0 2px 12px rgba(0,0,0,.5),0 0 0 .6px rgba(255,255,255,.08),inset 0 1px 1px rgba(255,255,255,.18)}
+  .cbtn svg{stroke:#fff}
+  #index span{color:#3d8bf5}
+  .rcall{background:rgba(255,255,255,.1)}
+  /* contato */
+  #contactView{background:linear-gradient(180deg,#6b7289 0%,#5f6182 14%,#4f4380 32%,#3f3369 52%,#2a2150 74%,#1a1230 100%)}
+  .bigav{color:#ececf1;background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.07),rgba(0,0,0,.2) 80%);border-color:rgba(255,255,255,.22);
+    box-shadow:inset 0 3px 4px rgba(255,255,255,.5),inset 0 -3px 5px rgba(255,255,255,.3),0 0 0 1px rgba(20,15,50,.4),0 8px 30px rgba(0,0,0,.25)}
+  .ab{background:rgba(90,75,150,.5);border-color:rgba(150,150,230,.5)}
+  .card{background:rgba(68,54,118,.55)}
+  #contactView .glass{background:rgba(95,95,145,.33);border-color:rgba(190,190,255,.42);color:#fff}
+  /* barra de abas */
+  .pill,.srch{background:rgba(72,72,80,.3);border-color:rgba(255,255,255,.14);
+    box-shadow:0 6px 22px rgba(0,0,0,.4),0 0 0 .5px rgba(255,255,255,.08),inset 0 1px 1px rgba(255,255,255,.2),inset 0 -1px 2px rgba(255,255,255,.06)}
+  body.oncontact .pill,body.oncontact .srch{background:rgba(110,100,170,.28);border-color:rgba(200,200,255,.25)}
+  .srch svg{stroke:#fff}
+  .tab{color:#fff}.tab.sel{color:#4a9bff}
+  .hl{background:rgba(0,0,0,.38)}
+  .tab .bg{fill:#f2f2f7}.tab .fg{fill:#1c1c1e}
+  .tab:not(.sel) svg path[stroke]{stroke:#1c1c1e}
+  .tab.sel svg path[stroke]{stroke:#fff}
+  /* teclado */
+  #disp{color:#fff}#addnum{color:#4a9bff}
+  .key{background:radial-gradient(circle at 50% 30%,#2b2b2e,#1c1c1e 75%);border-color:#303034;color:#fff;
+    box-shadow:0 8px 20px rgba(0,0,0,.5),inset 0 2px 4px rgba(255,255,255,.07)}
+  .key:active,.key.dn{background:#3a3a3e}
+  .callg{background:linear-gradient(180deg,#44944b,#397d3f);border-color:#4cb055}
+  .bk svg{fill:#8e8e93}
+  /* busca */
+  .sf svg{stroke:#8e8e93}
+  #sinput{color:#fff}
+  .nores{color:#fff}
+  #sclr{background:#636366}
+}
 
 /* ---------- CONFIG ---------- */
 #cfg{position:absolute;top:0;left:0;right:0;bottom:0;z-index:50;display:none;background:#08080c;color:#e8e8ee;
@@ -380,7 +430,7 @@ function paintContact(){
 function openContact(i){
   if(view!=='list')return;
   current=i; paintContact(); $('cscroll').scrollTop=0;
-  document.documentElement.style.background='#403a85'; baseEl=PANES[pane]; cv.classList.add('on'); baseEl.classList.add('shift'); document.body.classList.add('oncontact');
+  document.documentElement.classList.add('cvopen'); baseEl=PANES[pane]; cv.classList.add('on'); baseEl.classList.add('shift'); document.body.classList.add('oncontact');
   view='contact'; openedAt=Date.now();
 }
 function closeContact(commit,instant){
@@ -388,7 +438,7 @@ function closeContact(commit,instant){
   if(instant){cv.style.transition=baseEl.style.transition='none';}
   cv.classList.remove('on'); baseEl.classList.remove('shift'); document.body.classList.remove('oncontact');
   if(instant){void cv.offsetWidth; cv.style.transition=baseEl.style.transition='';}
-  document.documentElement.style.background='#fff';
+  document.documentElement.classList.remove('cvopen');
   view='list';
   if(commit){ lastCommit={t:Date.now(),prev:S.idx}; S.idx=Math.min(S.idx+1,5); save(); }
 }
