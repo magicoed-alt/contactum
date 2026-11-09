@@ -9,13 +9,14 @@
 <meta name="apple-mobile-web-app-title" content="Contatos">
 <meta name="theme-color" content="#ffffff">
 <link rel="apple-touch-icon" href="icon.png">
+<link rel="manifest" href="manifest.webmanifest">
 <title>Contatos</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
-html,body{margin:0;height:100%;overflow:hidden;background:#fff;overscroll-behavior:none;
+html,body{margin:0;width:100%;height:100%;min-height:100vh;min-height:-webkit-fill-available;overflow:hidden;background:#fff;overscroll-behavior:none;
   font-family:-apple-system,"SF Pro Text","SF Pro Display",system-ui,"Helvetica Neue",Arial,sans-serif;color:#000}
 :root{--top:max(env(safe-area-inset-top,0px),24px);--bot:max(env(safe-area-inset-bottom,0px),20px)}
-#app{position:fixed;top:0;left:0;right:0;bottom:0;overflow:hidden;background:#fff}
+#app{position:fixed;top:0;left:0;width:100%;height:100%;height:100vh;height:100lvh;overflow:hidden;background:#fff}
 .view{position:absolute;top:0;left:0;right:0;bottom:0;transition:transform .38s cubic-bezier(.32,.72,0,1)}
 
 /* ---------- LISTA ---------- */
@@ -91,10 +92,10 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff;overscroll-behavi
 /* ---------- TAB BAR ---------- */
 #tabbar{position:absolute;left:19px;right:19px;bottom:calc(var(--bot) - 15px);height:57px;display:flex;gap:6px;z-index:10}
 .pill{flex:1;position:relative;display:flex;justify-content:center;align-items:center;border-radius:29px;
-  background:rgba(250,250,253,.62);border:1px solid rgba(255,255,255,.75);
-  -webkit-backdrop-filter:blur(22px) saturate(190%);backdrop-filter:blur(22px) saturate(190%);
-  box-shadow:0 6px 20px rgba(0,0,0,.12),0 0 0 .6px rgba(0,0,0,.08),inset 0 1px 1px rgba(255,255,255,.9);transition:background .3s}
-.srch{flex:none;width:57px;height:57px;border-radius:50%;position:relative;transition:background .3s}
+  background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.55);
+  -webkit-backdrop-filter:blur(7px) saturate(190%);backdrop-filter:blur(7px) saturate(190%);
+  box-shadow:0 6px 22px rgba(0,0,0,.08),0 0 0 .5px rgba(0,0,0,.06),inset 0 1px 1px rgba(255,255,255,.8),inset 0 -1px 2px rgba(255,255,255,.35);transition:background .3s}
+.srch{flex:none;width:57px;height:57px;border-radius:50%;position:relative;transition:background .3s;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.55);-webkit-backdrop-filter:blur(7px) saturate(190%);backdrop-filter:blur(7px) saturate(190%);box-shadow:0 6px 22px rgba(0,0,0,.08),0 0 0 .5px rgba(0,0,0,.06),inset 0 1px 1px rgba(255,255,255,.8),inset 0 -1px 2px rgba(255,255,255,.35)}
 .srch.glass{position:relative}
 .pin{position:absolute;left:50%;width:292px;margin-left:-146px;top:0;bottom:0}
 .hl{position:absolute;top:4px;height:49px;border-radius:25px;background:rgba(118,118,128,.16);left:79px;width:92px;transition:left .3s cubic-bezier(.3,.8,.3,1),width .3s cubic-bezier(.3,.8,.3,1)}
@@ -104,7 +105,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:#fff;overscroll-behavi
 .badge{position:absolute;top:-1px;left:50%;margin-left:5px;min-width:21px;height:21px;border-radius:11px;background:#ef4444;color:#fff;font-size:12.5px;font-weight:600;line-height:21px;text-align:center;padding:0 5px;box-shadow:0 0 0 1.5px rgba(255,255,255,.6)}
 body.searching #tabbar{transform:translateY(130px);opacity:0;pointer-events:none}
 #tabbar{transition:transform .3s,opacity .3s}
-body.oncontact .pill,body.oncontact .srch{background:rgba(185,185,250,.45);border-color:rgba(215,215,255,.7)}
+body.oncontact .pill,body.oncontact .srch{background:rgba(200,205,255,.14);border-color:rgba(225,225,255,.55)}
 
 
 /* ---------- CHAMADAS ---------- */
@@ -274,6 +275,20 @@ body.oncontact .pill,body.oncontact .srch{background:rgba(185,185,250,.45);borde
 </div>
 
 <script>
+/* ===== tela cheia (iOS às vezes reporta altura menor) ===== */
+(function(){
+  const app=document.getElementById('app');
+  function fit(){
+    const portrait=innerHeight>=innerWidth;
+    const h=portrait?Math.max(innerHeight,screen.height||0,document.documentElement.clientHeight):innerHeight;
+    app.style.height=h+'px';
+    document.documentElement.style.setProperty('--vh',h+'px');
+  }
+  fit(); addEventListener('resize',fit); addEventListener('orientationchange',()=>setTimeout(fit,200));
+  addEventListener('pageshow',fit); document.addEventListener('visibilitychange',fit);
+  [100,400,1000,2500].forEach(t=>setTimeout(fit,t));
+})();
+
 /* ===== utilidades ===== */
 function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const strip=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'');
